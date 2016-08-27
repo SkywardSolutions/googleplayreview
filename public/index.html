@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Play store data fetch</title>
+  <link rel="stylesheet" href="/bootstrap/css/bootstrap.css" media="screen" charset="utf-8">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+
+  <script type="text/javascript">
+  $( document ).ready(function() {
+    $('#btnsubmit').click(function(){
+      var lines = $('#txtappid').val().split(/\n/);
+      $.ajax("/getreview", {
+        data: JSON.stringify( {'appid': lines, 'sort': $('#selSort').val()}),
+        method: "POST",
+        contentType: 'application/json',
+        success: function(data) {
+          // var count=0;
+          // var downloadURL = function downloadURL(url){
+          //   var hiddenIFrameID = 'hiddenDownloader' + count++;
+          //   var iframe = document.createElement('iframe');
+          //   iframe.id = hiddenIFrameID;
+          //   iframe.style.display = 'none';
+          //   document.body.appendChild(iframe);
+          //   iframe.src = url;
+          // }
+          //
+          // for (var i = 0; i < data.length; i++) {
+          //   downloadURL(data[i]);
+          // }
+          alert('Your request has been taken and file will be generated shortly.')
+
+          setInterval(function(){
+            $.get('/getStatus', function(data, error){
+              $('table tbody').empty()
+              if (error == "success"){
+                for (var i = 0; i < data.length; i++) {
+                  var status = data[i].status;
+                  if (data[i].status.toLowerCase() == 'complete'){
+                    status = '<a target="_blank" href="http://localhost:3000/download/'+ data[i].appId +'.csv">Download</a>'
+                  }
+                  $('table tbody').append('<tr><td>'+ data[i].appId +'</td><td>'+ data[i].pageNo +'</td><td>'+ status +'</td></tr>')
+                }
+              }
+            })
+          }, 1000)
+        },
+        error: function(error) {
+          alert(error);
+        }
+      });
+    })
+  });
+  </script>
+</head>
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-6">
+        <h3>RETRIEVE PLAY STORE REVIEWS</h3>
+        <label for="">Sort</label>
+        <br>
+        <select id="selSort" name="">
+          <option value="0">NEWEST</option>
+          <option value="1">RATING</option>
+          <option value="2">HELPFULNESS</option>
+        </select>
+        <br>
+        <label for="">Enter app ids</label>
+        <br>
+        <textarea name="txtappid" id="txtappid" rows="8" cols="40">com.adore.asx&#13;&#10;com.csam.icici.bank.imobile</textarea>
+        <br>
+        <button type="button" name="button" class="btn btn-primary" id="btnsubmit">Submit</button>
+      </div>
+      <div class="col-sm-6">
+        <h3>FILE CREATION STATUS</h3>
+        <table style="width:100%">
+          <thead>
+            <tr>
+              <th>
+                App
+              </th>
+              <th>
+                Page
+              </th>
+              <th>
+                Status
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>
